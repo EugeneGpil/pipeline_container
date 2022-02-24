@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+
+    php:
+        build:
+            context: php
+        volumes:
+            - ./project:/usr/share/nginx/html
+        working_dir: /usr/share/nginx/html
+        restart: unless-stopped
+        command: bash -c "service php8.1-fpm start && tail -F anything"
+
+    nginx:
+        build:
+            context: nginx
+        volumes:
+            - ./project:/usr/share/nginx/html
+        restart: unless-stopped
+        ports:
+            - 80:80
+
+    mysql:
+        image: mysql:8.0
+        command: --default-authentication-plugin=mysql_native_password
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: 123
+        volumes: 
+            - ./databases:/var/lib/mysql
+            - ./project:/usr/share/nginx/html
+        ports:
+            - 33066:3306
+        working_dir: /usr/share/nginx/html
+
+    adminer:
+        image: adminer
+        ports:
+            - 8080:8080
